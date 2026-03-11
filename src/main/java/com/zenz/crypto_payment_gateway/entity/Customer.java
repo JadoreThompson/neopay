@@ -3,6 +3,8 @@ package com.zenz.crypto_payment_gateway.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Entity
 @Table(name="customers")
@@ -22,9 +24,16 @@ public class Customer {
     private long createdAt;
 
     // Relationships
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "merchant_id", nullable = false)
+    private Merchant merchant;
+
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<Invoice> invoices;
+
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<Subscription> subscriptions;
 
     @PrePersist
     public void prePersist() {

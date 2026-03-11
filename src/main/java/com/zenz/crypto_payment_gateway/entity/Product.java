@@ -3,7 +3,6 @@ package com.zenz.crypto_payment_gateway.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,7 +13,7 @@ public class Product {
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID productId;
 
     @Column(nullable = false)
     private String name;
@@ -32,8 +31,8 @@ public class Product {
     // Relationships
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="user_id")
-    private User user;
+    @JoinColumn(name = "merchant_id", nullable = false)
+    private Merchant merchant;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Price> prices;

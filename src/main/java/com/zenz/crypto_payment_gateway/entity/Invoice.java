@@ -13,7 +13,7 @@ import java.util.UUID;
 public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID invoiceId;
 
     private long amountDue;
 
@@ -32,9 +32,12 @@ public class Invoice {
 
     // Relationships
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
+
+    @OneToMany(mappedBy = "invoice", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<Transaction> transactions;
 
     // Operations
 

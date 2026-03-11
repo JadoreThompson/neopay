@@ -14,7 +14,7 @@ import java.util.UUID;
 public class Price {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID priceId;
 
     @Column(nullable = false)
     @Positive

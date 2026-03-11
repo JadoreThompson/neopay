@@ -13,7 +13,7 @@ public class User {
     @Id
     @Column(name="user_id")
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID userId;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -27,12 +27,10 @@ public class User {
     // Relationships
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    private List<Product> products;
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    private List<Customer> customers;
+    private List<Merchant> merchants;
 
     // Operations
+
     @PrePersist
     public void prePersist() {
         createdAt = System.currentTimeMillis();
