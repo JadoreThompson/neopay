@@ -21,15 +21,16 @@ public class Product {
 
     private String description;
 
+    private String image;
+
     @Column(nullable = false)
     private String walletAddress;
-
-    private String image;
 
     @Column(nullable = false, updatable = false)
     private long createdAt;
 
     // Relationships
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id")
     private User user;

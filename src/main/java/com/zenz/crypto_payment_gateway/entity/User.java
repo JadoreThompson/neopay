@@ -3,7 +3,6 @@ package com.zenz.crypto_payment_gateway.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 

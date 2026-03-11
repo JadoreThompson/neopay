@@ -6,5 +6,6 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class Recurring {
     private PricingInterval interval;
+
     private int intervalCount;
 }
