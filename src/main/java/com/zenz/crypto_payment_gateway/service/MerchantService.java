@@ -31,6 +31,10 @@ public class MerchantService {
         return merchantRepository.findById(merchantId).orElse(null);
     }
     
+    public Merchant getMerchantByIdAndUserId(UUID merchantId, UUID userId) {
+        return merchantRepository.findByMerchantIdAndUserId(merchantId, userId).orElse(null);
+    }
+    
     public List<Merchant> getMerchantsByUser(User user) {
         return merchantRepository.findByUser(user);
     }
