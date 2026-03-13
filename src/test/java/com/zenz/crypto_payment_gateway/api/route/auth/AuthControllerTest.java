@@ -7,10 +7,12 @@ import com.zenz.crypto_payment_gateway.api.route.auth.model.request.RegisterRequ
 import com.zenz.crypto_payment_gateway.entity.User;
 import com.zenz.crypto_payment_gateway.service.AuthService;
 import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -18,15 +20,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Comprehensive test suite for AuthController endpoints.
@@ -76,10 +74,10 @@ class AuthControllerTest {
         Mockito.when(authService.createUser(testEmail, testPassword)).thenReturn(testUser);
         Mockito.when(authService.login(testEmail, testPassword)).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
 
         Mockito.verify(authService).createUser(testEmail, testPassword);
         Mockito.verify(authService).login(testEmail, testPassword);
@@ -95,12 +93,12 @@ class AuthControllerTest {
         Mockito.when(authService.createUser(testEmail, testPassword)).thenReturn(testUser);
         Mockito.when(authService.login(testEmail, testPassword)).thenReturn(testToken);
 
-        MvcResult result = mockMvc.perform(post("/auth/register/")
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(cookie().exists(JWTAuthenticationFilter.JWT_COOKIE_NAME))
-                .andExpect(cookie().value(JWTAuthenticationFilter.JWT_COOKIE_NAME, testToken))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.cookie().exists(JWTAuthenticationFilter.JWT_COOKIE_NAME))
+                .andExpect(MockMvcResultMatchers.cookie().value(JWTAuthenticationFilter.JWT_COOKIE_NAME, testToken))
                 .andReturn();
 
         Cookie[] cookies = result.getResponse().getCookies();
@@ -108,12 +106,12 @@ class AuthControllerTest {
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals(JWTAuthenticationFilter.JWT_COOKIE_NAME)) {
                 foundJwtCookie = true;
-                assertTrue(cookie.isHttpOnly(), "JWT cookie should be HttpOnly");
-                assertEquals("/", cookie.getPath(), "JWT cookie path should be /");
-                assertTrue(cookie.getMaxAge() > 0, "JWT cookie should have positive max age");
+                Assertions.assertTrue(cookie.isHttpOnly(), "JWT cookie should be HttpOnly");
+                Assertions.assertEquals("/", cookie.getPath(), "JWT cookie path should be /");
+                Assertions.assertTrue(cookie.getMaxAge() > 0, "JWT cookie should have positive max age");
             }
         }
-        assertTrue(foundJwtCookie, "JWT cookie should be present");
+        Assertions.assertTrue(foundJwtCookie, "JWT cookie should be present");
     }
 
     @Test
@@ -130,10 +128,10 @@ class AuthControllerTest {
         Mockito.when(authService.createUser("newuser@example.com", "NewSecurePassword12")).thenReturn(newUser);
         Mockito.when(authService.login("newuser@example.com", "NewSecurePassword12")).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
 
         Mockito.verify(authService).createUser("newuser@example.com", "NewSecurePassword12");
     }
@@ -145,12 +143,12 @@ class AuthControllerTest {
         request.setEmail(null);
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -160,12 +158,12 @@ class AuthControllerTest {
         request.setEmail("");
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -175,12 +173,12 @@ class AuthControllerTest {
         request.setEmail("   ");
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -190,12 +188,12 @@ class AuthControllerTest {
         request.setEmail("invalidemail.com");
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -205,12 +203,12 @@ class AuthControllerTest {
         request.setEmail("invalid@");
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -220,12 +218,12 @@ class AuthControllerTest {
         request.setEmail("@example.com");
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -235,12 +233,12 @@ class AuthControllerTest {
         request.setEmail("test@@example.com");
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -253,10 +251,10 @@ class AuthControllerTest {
         Mockito.when(authService.createUser("user@domain.com", testPassword)).thenReturn(testUser);
         Mockito.when(authService.login("user@domain.com", testPassword)).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
@@ -269,10 +267,10 @@ class AuthControllerTest {
         Mockito.when(authService.createUser("user@mail.domain.com", testPassword)).thenReturn(testUser);
         Mockito.when(authService.login("user@mail.domain.com", testPassword)).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
@@ -285,10 +283,10 @@ class AuthControllerTest {
         Mockito.when(authService.createUser("user+tag@domain.com", testPassword)).thenReturn(testUser);
         Mockito.when(authService.login("user+tag@domain.com", testPassword)).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
@@ -298,12 +296,12 @@ class AuthControllerTest {
         request.setEmail(testEmail);
         request.setPassword(null);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -313,12 +311,12 @@ class AuthControllerTest {
         request.setEmail(testEmail);
         request.setPassword("");
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -328,12 +326,12 @@ class AuthControllerTest {
         request.setEmail(testEmail);
         request.setPassword("Short1A");
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -343,12 +341,12 @@ class AuthControllerTest {
         request.setEmail(testEmail);
         request.setPassword("SevenAB");
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -361,10 +359,10 @@ class AuthControllerTest {
         Mockito.when(authService.createUser(testEmail, "EightABc")).thenReturn(testUser);
         Mockito.when(authService.login(testEmail, "EightABc")).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
@@ -374,12 +372,12 @@ class AuthControllerTest {
         request.setEmail(testEmail);
         request.setPassword("alllowercase1");
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -389,12 +387,12 @@ class AuthControllerTest {
         request.setEmail(testEmail);
         request.setPassword("Onlyoneupper");
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -407,10 +405,10 @@ class AuthControllerTest {
         Mockito.when(authService.createUser(testEmail, "TwoUpper12")).thenReturn(testUser);
         Mockito.when(authService.login(testEmail, "TwoUpper12")).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
@@ -423,10 +421,10 @@ class AuthControllerTest {
         Mockito.when(authService.createUser(testEmail, "THREEUPPER12")).thenReturn(testUser);
         Mockito.when(authService.login(testEmail, "THREEUPPER12")).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
@@ -439,10 +437,10 @@ class AuthControllerTest {
         Mockito.when(authService.createUser(testEmail, "Str0ngP@ssW0rd!")).thenReturn(testUser);
         Mockito.when(authService.login(testEmail, "Str0ngP@ssW0rd!")).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
@@ -455,34 +453,34 @@ class AuthControllerTest {
         Mockito.when(authService.createUser(testEmail, testPassword))
                 .thenThrow(new RuntimeException("User with this email already exists"));
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is5xxServerError());
+                .andExpect(MockMvcResultMatchers.status().is5xxServerError());
 
         Mockito.verify(authService).createUser(testEmail, testPassword);
-        Mockito.verify(authService, Mockito.never()).login(any(), any());
+        Mockito.verify(authService, Mockito.never()).login(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
     @DisplayName("Register: Should reject registration with missing request body")
     void register_withMissingBody_shouldReturnBadRequest() throws Exception {
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
     @DisplayName("Register: Should reject registration with malformed JSON")
     void register_withMalformedJson_shouldReturnBadRequest() throws Exception {
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{invalid json}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -492,12 +490,12 @@ class AuthControllerTest {
         request.setEmail(testEmail);
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.TEXT_PLAIN)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnsupportedMediaType());
+                .andExpect(MockMvcResultMatchers.status().isUnsupportedMediaType());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     // LOGIN ENDPOINT TESTS
@@ -511,10 +509,10 @@ class AuthControllerTest {
 
         Mockito.when(authService.login(testEmail, testPassword)).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/login/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
 
         Mockito.verify(authService).login(testEmail, testPassword);
     }
@@ -528,12 +526,12 @@ class AuthControllerTest {
 
         Mockito.when(authService.login(testEmail, testPassword)).thenReturn(testToken);
 
-        MvcResult result = mockMvc.perform(post("/auth/login/")
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(cookie().exists(JWTAuthenticationFilter.JWT_COOKIE_NAME))
-                .andExpect(cookie().value(JWTAuthenticationFilter.JWT_COOKIE_NAME, testToken))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.cookie().exists(JWTAuthenticationFilter.JWT_COOKIE_NAME))
+                .andExpect(MockMvcResultMatchers.cookie().value(JWTAuthenticationFilter.JWT_COOKIE_NAME, testToken))
                 .andReturn();
 
         Cookie[] cookies = result.getResponse().getCookies();
@@ -541,12 +539,12 @@ class AuthControllerTest {
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals(JWTAuthenticationFilter.JWT_COOKIE_NAME)) {
                 foundJwtCookie = true;
-                assertTrue(cookie.isHttpOnly(), "JWT cookie should be HttpOnly");
-                assertEquals("/", cookie.getPath(), "JWT cookie path should be /");
-                assertTrue(cookie.getMaxAge() > 0, "JWT cookie should have positive max age");
+                Assertions.assertTrue(cookie.isHttpOnly(), "JWT cookie should be HttpOnly");
+                Assertions.assertEquals("/", cookie.getPath(), "JWT cookie path should be /");
+                Assertions.assertTrue(cookie.getMaxAge() > 0, "JWT cookie should have positive max age");
             }
         }
-        assertTrue(foundJwtCookie, "JWT cookie should be present");
+        Assertions.assertTrue(foundJwtCookie, "JWT cookie should be present");
     }
 
     @Test
@@ -559,10 +557,10 @@ class AuthControllerTest {
         Mockito.when(authService.login("nonexistent@example.com", testPassword))
                 .thenThrow(new RuntimeException("Invalid email or password"));
 
-        mockMvc.perform(post("/auth/login/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is5xxServerError());
+                .andExpect(MockMvcResultMatchers.status().is5xxServerError());
     }
 
     @Test
@@ -575,10 +573,10 @@ class AuthControllerTest {
         Mockito.when(authService.login(testEmail, "WrongPassword12"))
                 .thenThrow(new RuntimeException("Invalid email or password"));
 
-        mockMvc.perform(post("/auth/login/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is5xxServerError());
+                .andExpect(MockMvcResultMatchers.status().is5xxServerError());
     }
 
     @Test
@@ -591,10 +589,10 @@ class AuthControllerTest {
         Mockito.when(authService.login(testEmail, "WrongPassword12"))
                 .thenThrow(new RuntimeException("Invalid email or password"));
 
-        mockMvc.perform(post("/auth/login/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is5xxServerError());
+                .andExpect(MockMvcResultMatchers.status().is5xxServerError());
     }
 
     @Test
@@ -604,12 +602,12 @@ class AuthControllerTest {
         request.setEmail(null);
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/login/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).login(any(), any());
+        Mockito.verify(authService, Mockito.never()).login(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -619,12 +617,12 @@ class AuthControllerTest {
         request.setEmail("");
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/login/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).login(any(), any());
+        Mockito.verify(authService, Mockito.never()).login(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -634,12 +632,12 @@ class AuthControllerTest {
         request.setEmail("invalid-email");
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/login/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).login(any(), any());
+        Mockito.verify(authService, Mockito.never()).login(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -649,12 +647,12 @@ class AuthControllerTest {
         request.setEmail(testEmail);
         request.setPassword(null);
 
-        mockMvc.perform(post("/auth/login/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).login(any(), any());
+        Mockito.verify(authService, Mockito.never()).login(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -664,66 +662,66 @@ class AuthControllerTest {
         request.setEmail(testEmail);
         request.setPassword("");
 
-        mockMvc.perform(post("/auth/login/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).login(any(), any());
+        Mockito.verify(authService, Mockito.never()).login(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
     @DisplayName("Login: Should reject login with missing request body")
     void login_withMissingBody_shouldReturnBadRequest() throws Exception {
-        mockMvc.perform(post("/auth/login/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).login(any(), any());
+        Mockito.verify(authService, Mockito.never()).login(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
     @DisplayName("Login: Should reject login with malformed JSON")
     void login_withMalformedJson_shouldReturnBadRequest() throws Exception {
-        mockMvc.perform(post("/auth/login/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{invalid json}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).login(any(), any());
+        Mockito.verify(authService, Mockito.never()).login(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     // ME ENDPOINT TESTS
     @Test
     @DisplayName("Me: Should return user info when authenticated")
     void me_whenAuthenticated_shouldReturnUserInfo() throws Exception {
-        mockMvc.perform(get("/auth/me/")
+        mockMvc.perform(MockMvcRequestBuilders.get("/auth/me/")
                 .principal(() -> testEmail))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     @DisplayName("Me: Should return correct email in response")
     void me_whenAuthenticated_shouldReturnCorrectEmail() throws Exception {
-        mockMvc.perform(get("/auth/me/")
+        mockMvc.perform(MockMvcRequestBuilders.get("/auth/me/")
                 .principal(() -> testEmail))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").doesNotExist());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email").doesNotExist());
     }
 
     @Test
     @DisplayName("Me: Should return 401 when not authenticated")
     void me_whenNotAuthenticated_shouldReturnUnauthorized() throws Exception {
-        mockMvc.perform(get("/auth/me/"))
-                .andExpect(status().isUnauthorized());
+        mockMvc.perform(MockMvcRequestBuilders.get("/auth/me/"))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 
     @Test
     @DisplayName("Me: Should return 401 with invalid JWT token")
     void me_withInvalidJwt_shouldReturnUnauthorized() throws Exception {
-        mockMvc.perform(get("/auth/me/")
+        mockMvc.perform(MockMvcRequestBuilders.get("/auth/me/")
                 .cookie(new Cookie(JWTAuthenticationFilter.JWT_COOKIE_NAME, "invalid-token")))
-                .andExpect(status().isUnauthorized());
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 
     @Test
@@ -731,17 +729,17 @@ class AuthControllerTest {
     void me_withExpiredJwt_shouldReturnUnauthorized() throws Exception {
         String expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.expired";
 
-        mockMvc.perform(get("/auth/me/")
+        mockMvc.perform(MockMvcRequestBuilders.get("/auth/me/")
                 .cookie(new Cookie(JWTAuthenticationFilter.JWT_COOKIE_NAME, expiredToken)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 
     @Test
     @DisplayName("Me: Should return JSON content type")
     void me_shouldReturnJsonContentType() throws Exception {
-        mockMvc.perform(get("/auth/me/")
+        mockMvc.perform(MockMvcRequestBuilders.get("/auth/me/")
                 .principal(() -> testEmail))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
     }
 
     // LOGOUT ENDPOINT TESTS
@@ -749,16 +747,16 @@ class AuthControllerTest {
     @Test
     @DisplayName("Logout: Should logout successfully")
     void logout_shouldReturnOk() throws Exception {
-        mockMvc.perform(post("/auth/logout/"))
-                .andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/logout/"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     @DisplayName("Logout: Should clear JWT cookie upon logout")
     void logout_shouldClearJwtCookie() throws Exception {
-        MvcResult result = mockMvc.perform(post("/auth/logout/"))
-                .andExpect(status().isOk())
-                .andExpect(cookie().exists(JWTAuthenticationFilter.JWT_COOKIE_NAME))
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/auth/logout/"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.cookie().exists(JWTAuthenticationFilter.JWT_COOKIE_NAME))
                 .andReturn();
 
         Cookie[] cookies = result.getResponse().getCookies();
@@ -766,34 +764,34 @@ class AuthControllerTest {
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals(JWTAuthenticationFilter.JWT_COOKIE_NAME)) {
                 foundClearedCookie = true;
-                assertEquals(0, cookie.getMaxAge(), "JWT cookie should have MaxAge=0 to clear");
-                assertNull(cookie.getValue(), "JWT cookie value should be null");
-                assertTrue(cookie.isHttpOnly(), "JWT cookie should still be HttpOnly when cleared");
-                assertEquals("/", cookie.getPath(), "JWT cookie path should be /");
+                Assertions.assertEquals(0, cookie.getMaxAge(), "JWT cookie should have MaxAge=0 to clear");
+                Assertions.assertNull(cookie.getValue(), "JWT cookie value should be null");
+                Assertions.assertTrue(cookie.isHttpOnly(), "JWT cookie should still be HttpOnly when cleared");
+                Assertions.assertEquals("/", cookie.getPath(), "JWT cookie path should be /");
             }
         }
-        assertTrue(foundClearedCookie, "JWT cookie should be present in response");
+        Assertions.assertTrue(foundClearedCookie, "JWT cookie should be present in response");
     }
 
     @Test
     @DisplayName("Logout: Should work even without existing JWT cookie")
     void logout_withoutExistingCookie_shouldStillSucceed() throws Exception {
-        mockMvc.perform(post("/auth/logout/"))
-                .andExpect(status().isOk())
-                .andExpect(cookie().exists(JWTAuthenticationFilter.JWT_COOKIE_NAME));
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/logout/"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.cookie().exists(JWTAuthenticationFilter.JWT_COOKIE_NAME));
     }
 
     @Test
     @DisplayName("Logout: Should set HttpOnly flag on cleared cookie")
     void logout_shouldSetHttpOnlyOnClearedCookie() throws Exception {
-        MvcResult result = mockMvc.perform(post("/auth/logout/"))
-                .andExpect(status().isOk())
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/auth/logout/"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
         Cookie[] cookies = result.getResponse().getCookies();
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals(JWTAuthenticationFilter.JWT_COOKIE_NAME)) {
-                assertTrue(cookie.isHttpOnly(), "Cleared JWT cookie should be HttpOnly");
+                Assertions.assertTrue(cookie.isHttpOnly(), "Cleared JWT cookie should be HttpOnly");
             }
         }
     }
@@ -801,14 +799,14 @@ class AuthControllerTest {
     @Test
     @DisplayName("Logout: Should set correct path on cleared cookie")
     void logout_shouldSetCorrectPathOnClearedCookie() throws Exception {
-        MvcResult result = mockMvc.perform(post("/auth/logout/"))
-                .andExpect(status().isOk())
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/auth/logout/"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
         Cookie[] cookies = result.getResponse().getCookies();
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals(JWTAuthenticationFilter.JWT_COOKIE_NAME)) {
-                assertEquals("/", cookie.getPath(), "Cleared JWT cookie should have path /");
+                Assertions.assertEquals("/", cookie.getPath(), "Cleared JWT cookie should have path /");
             }
         }
     }
@@ -824,10 +822,10 @@ class AuthControllerTest {
         Mockito.when(authService.createUser(testEmail, testPassword))
                 .thenThrow(new RuntimeException("Database connection string: jdbc:postgresql://..."));
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is5xxServerError());
+                .andExpect(MockMvcResultMatchers.status().is5xxServerError());
     }
 
     @Test
@@ -837,15 +835,15 @@ class AuthControllerTest {
         request.setEmail("test@example.com");
         request.setPassword("PasswordAB'; DROP TABLE users;--");
 
-        Mockito.when(authService.createUser(any(), any())).thenReturn(testUser);
-        Mockito.when(authService.login(any(), any())).thenReturn(testToken);
+        Mockito.when(authService.createUser(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(testUser);
+        Mockito.when(authService.login(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
 
-        Mockito.verify(authService).createUser(eq("test@example.com"), eq("PasswordAB'; DROP TABLE users;--"));
+        Mockito.verify(authService).createUser(ArgumentMatchers.eq("test@example.com"), ArgumentMatchers.eq("PasswordAB'; DROP TABLE users;--"));
     }
 
     @Test
@@ -855,12 +853,12 @@ class AuthControllerTest {
         request.setEmail("<script>alert('xss')</script>@example.com");
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -873,12 +871,12 @@ class AuthControllerTest {
         request.setEmail(longEmail);
         request.setPassword(longPassword);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     // RATE LIMITING AND ABUSE PREVENTION TESTS
@@ -893,10 +891,10 @@ class AuthControllerTest {
                 .thenThrow(new RuntimeException("Invalid email or password"));
 
         for (int i = 0; i < 5; i++) {
-            mockMvc.perform(post("/auth/login/")
+            mockMvc.perform(MockMvcRequestBuilders.post("/auth/login/")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().is5xxServerError());
+                    .andExpect(MockMvcResultMatchers.status().is5xxServerError());
         }
 
         Mockito.verify(authService, Mockito.times(5)).login(testEmail, "WrongPassword12");
@@ -911,12 +909,12 @@ class AuthControllerTest {
         request.setEmail("  test@example.com  ");
         request.setPassword(testPassword);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -926,12 +924,12 @@ class AuthControllerTest {
         request.setEmail(testEmail);
         request.setPassword("        ");
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-        Mockito.verify(authService, Mockito.never()).createUser(any(), any());
+        Mockito.verify(authService, Mockito.never()).createUser(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -944,10 +942,10 @@ class AuthControllerTest {
         Mockito.when(authService.createUser("TEST@EXAMPLE.COM", testPassword)).thenReturn(testUser);
         Mockito.when(authService.login("TEST@EXAMPLE.COM", testPassword)).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
@@ -960,9 +958,9 @@ class AuthControllerTest {
         Mockito.when(authService.createUser(testEmail, "P@sswörd12")).thenReturn(testUser);
         Mockito.when(authService.login(testEmail, "P@sswörd12")).thenReturn(testToken);
 
-        mockMvc.perform(post("/auth/register/")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

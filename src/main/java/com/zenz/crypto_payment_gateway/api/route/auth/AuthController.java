@@ -8,6 +8,7 @@ import com.zenz.crypto_payment_gateway.entity.User;
 import com.zenz.crypto_payment_gateway.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,7 +22,10 @@ public class AuthController {
     private final AuthService authService;
     
     @PostMapping("/register/")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequest body, HttpServletResponse response) {
+    public ResponseEntity<Void> register(
+            @Valid @RequestBody RegisterRequest body,
+            HttpServletResponse response
+    ) {
         User user = authService.createUser(body.getEmail(), body.getPassword());
         String token = authService.login(body.getEmail(), body.getPassword());
         setJwtCookie(response, token);
@@ -30,7 +34,10 @@ public class AuthController {
     }
     
     @PostMapping("/login/")
-    public ResponseEntity<Void> login(@RequestBody LoginRequest body, HttpServletResponse response) {
+    public ResponseEntity<Void> login(
+            @Valid @RequestBody LoginRequest body,
+            HttpServletResponse response
+    ) {
         String token = authService.login(body.getEmail(), body.getPassword());
         setJwtCookie(response, token);
         return ResponseEntity.ok().build();
