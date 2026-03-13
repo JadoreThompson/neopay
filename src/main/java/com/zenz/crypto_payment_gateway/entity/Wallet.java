@@ -15,6 +15,9 @@ public class Wallet {
     private UUID walletId;
 
     @Column(nullable = false)
+    private UUID merchantId;
+
+    @Column(nullable = false)
     private long balance;
 
     @Column(nullable = false)
