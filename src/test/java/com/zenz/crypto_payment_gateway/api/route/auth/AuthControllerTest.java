@@ -2,44 +2,53 @@ package com.zenz.crypto_payment_gateway.api.route.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zenz.crypto_payment_gateway.api.config.JWTAuthenticationFilter;
+import com.zenz.crypto_payment_gateway.api.config.SecurityConfig;
+import com.zenz.crypto_payment_gateway.api.GlobalExceptionHandler;
 import com.zenz.crypto_payment_gateway.api.route.auth.model.request.LoginRequest;
 import com.zenz.crypto_payment_gateway.api.route.auth.model.request.RegisterRequest;
 import com.zenz.crypto_payment_gateway.entity.User;
+import com.zenz.crypto_payment_gateway.repository.UserRepository;
 import com.zenz.crypto_payment_gateway.service.AuthService;
+import com.zenz.crypto_payment_gateway.service.JWTService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Comprehensive test suite for AuthController endpoints.
  * Tests target expected behavior and validation standards for production readiness.
  */
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(AuthController.class)
+@Import({SecurityConfig.class, GlobalExceptionHandler.class})
 class AuthControllerTest {
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockitoBean
     private AuthService authService;
 
-    @InjectMocks
-    private AuthController authController;
+    @MockitoBean
+    private JWTService jwtService;
+
+    @MockitoBean
+    private UserRepository userRepository;
 
     private ObjectMapper objectMapper;
     private User testUser;
@@ -49,7 +58,6 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(authController).build();
         objectMapper = new ObjectMapper();
 
         testEmail = "test@example.com";
@@ -695,18 +703,28 @@ class AuthControllerTest {
     @Test
     @DisplayName("Me: Should return user info when authenticated")
     void me_whenAuthenticated_shouldReturnUserInfo() throws Exception {
+        // Mock JWT service to return valid user
+        Mockito.when(jwtService.isTokenValid(testToken)).thenReturn(true);
+        Mockito.when(jwtService.extractUserId(testToken)).thenReturn(Optional.of(testUser.getUserId().toString()));
+        Mockito.when(userRepository.findById(testUser.getUserId())).thenReturn(Optional.of(testUser));
+
         mockMvc.perform(MockMvcRequestBuilders.get("/auth/me/")
-                .principal(() -> testEmail))
+                .cookie(new Cookie(JWTAuthenticationFilter.JWT_COOKIE_NAME, testToken)))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     @DisplayName("Me: Should return correct email in response")
     void me_whenAuthenticated_shouldReturnCorrectEmail() throws Exception {
+        // Mock JWT service to return valid user
+        Mockito.when(jwtService.isTokenValid(testToken)).thenReturn(true);
+        Mockito.when(jwtService.extractUserId(testToken)).thenReturn(Optional.of(testUser.getUserId().toString()));
+        Mockito.when(userRepository.findById(testUser.getUserId())).thenReturn(Optional.of(testUser));
+
         mockMvc.perform(MockMvcRequestBuilders.get("/auth/me/")
-                .principal(() -> testEmail))
+                .cookie(new Cookie(JWTAuthenticationFilter.JWT_COOKIE_NAME, testToken)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.email").doesNotExist());
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value(testEmail));
     }
 
     @Test
@@ -719,6 +737,8 @@ class AuthControllerTest {
     @Test
     @DisplayName("Me: Should return 401 with invalid JWT token")
     void me_withInvalidJwt_shouldReturnUnauthorized() throws Exception {
+        Mockito.when(jwtService.isTokenValid("invalid-token")).thenReturn(false);
+
         mockMvc.perform(MockMvcRequestBuilders.get("/auth/me/")
                 .cookie(new Cookie(JWTAuthenticationFilter.JWT_COOKIE_NAME, "invalid-token")))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
@@ -728,6 +748,7 @@ class AuthControllerTest {
     @DisplayName("Me: Should return 401 with expired JWT token")
     void me_withExpiredJwt_shouldReturnUnauthorized() throws Exception {
         String expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.expired";
+        Mockito.when(jwtService.isTokenValid(expiredToken)).thenReturn(false);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/auth/me/")
                 .cookie(new Cookie(JWTAuthenticationFilter.JWT_COOKIE_NAME, expiredToken)))
@@ -737,8 +758,13 @@ class AuthControllerTest {
     @Test
     @DisplayName("Me: Should return JSON content type")
     void me_shouldReturnJsonContentType() throws Exception {
+        // Mock JWT service to return valid user
+        Mockito.when(jwtService.isTokenValid(testToken)).thenReturn(true);
+        Mockito.when(jwtService.extractUserId(testToken)).thenReturn(Optional.of(testUser.getUserId().toString()));
+        Mockito.when(userRepository.findById(testUser.getUserId())).thenReturn(Optional.of(testUser));
+
         mockMvc.perform(MockMvcRequestBuilders.get("/auth/me/")
-                .principal(() -> testEmail))
+                .cookie(new Cookie(JWTAuthenticationFilter.JWT_COOKIE_NAME, testToken)))
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
     }
 
@@ -951,12 +977,13 @@ class AuthControllerTest {
     @Test
     @DisplayName("Edge Case: Should handle Unicode characters in password")
     void register_withUnicodePassword_shouldSucceed() throws Exception {
+        final String password = "P@sswörd12T";
         RegisterRequest request = new RegisterRequest();
         request.setEmail(testEmail);
-        request.setPassword("P@sswörd12");
+        request.setPassword(password);
 
-        Mockito.when(authService.createUser(testEmail, "P@sswörd12")).thenReturn(testUser);
-        Mockito.when(authService.login(testEmail, "P@sswörd12")).thenReturn(testToken);
+        Mockito.when(authService.createUser(testEmail, password)).thenReturn(testUser);
+        Mockito.when(authService.login(testEmail, password)).thenReturn(testToken);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/auth/register/")
                 .contentType(MediaType.APPLICATION_JSON)

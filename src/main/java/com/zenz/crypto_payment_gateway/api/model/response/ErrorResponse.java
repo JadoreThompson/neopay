@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ErrorResponse {
-    private ErrorDetail errorDetail;
+    private ErrorDetail error;
 }
