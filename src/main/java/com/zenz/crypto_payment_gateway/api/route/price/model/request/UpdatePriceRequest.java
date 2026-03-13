@@ -1,4 +1,4 @@
-package com.zenz.crypto_payment_gateway.api.route.price.request;
+package com.zenz.crypto_payment_gateway.api.route.price.model.request;
 
 import lombok.Data;
 

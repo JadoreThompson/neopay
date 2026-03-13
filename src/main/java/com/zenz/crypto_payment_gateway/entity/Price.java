@@ -16,6 +16,9 @@ public class Price {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID priceId;
 
+    @Column(nullable = false, updatable = false)
+    private UUID productId;
+
     @Column(nullable = false)
     @Positive
     private long amount;
