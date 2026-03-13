@@ -14,7 +14,7 @@ public class AuthService {
     private final JWTService jwtService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     
-    public User register(String email, String password) {
+    public User createUser(String email, String password) {
         if (userRepository.findByEmail(email) != null) {
             throw new RuntimeException("User with this email already exists");
         }

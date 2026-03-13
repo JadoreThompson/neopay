@@ -22,7 +22,7 @@ public class AuthController {
     
     @PostMapping("/register/")
     public ResponseEntity<Void> register(@RequestBody RegisterRequest body, HttpServletResponse response) {
-        User user = authService.register(body.getEmail(), body.getPassword());
+        User user = authService.createUser(body.getEmail(), body.getPassword());
         String token = authService.login(body.getEmail(), body.getPassword());
         setJwtCookie(response, token);
         
