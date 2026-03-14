@@ -13,5 +13,5 @@ import java.util.UUID;
 public interface MerchantRepository extends JpaRepository<Merchant, UUID> {
     List<Merchant> findByUser(User user);
     List<Merchant> findByUserId(UUID userId);
-    Optional<Merchant> findByMerchantIdAndUserId(UUID merchantId, UUID userId);
+    Optional<Merchant> findByIdAndUserId(UUID id, UUID userId);
 }

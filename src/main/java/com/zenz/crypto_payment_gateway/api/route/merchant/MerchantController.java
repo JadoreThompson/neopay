@@ -1,16 +1,14 @@
 package com.zenz.crypto_payment_gateway.api.route.merchant;
 
 import com.zenz.crypto_payment_gateway.api.error.ResourceNotFound;
-import com.zenz.crypto_payment_gateway.api.model.response.ErrorResponse;
-import com.zenz.crypto_payment_gateway.api.model.response.SimpleErrorDetail;
 import com.zenz.crypto_payment_gateway.api.route.merchant.request.CreateMerchantRequest;
 import com.zenz.crypto_payment_gateway.api.route.merchant.request.UpdateMerchantRequest;
 import com.zenz.crypto_payment_gateway.api.route.merchant.response.MerchantResponse;
 import com.zenz.crypto_payment_gateway.entity.Merchant;
 import com.zenz.crypto_payment_gateway.entity.User;
 import com.zenz.crypto_payment_gateway.service.MerchantService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +26,7 @@ public class MerchantController {
     @PostMapping
     public ResponseEntity<MerchantResponse> createMerchant(
             @AuthenticationPrincipal User user,
-            @RequestBody CreateMerchantRequest body) {
+            @Valid @RequestBody CreateMerchantRequest body) {
         
         Merchant merchant = merchantService.createMerchant(user, body);
         return ResponseEntity.ok(merchantService.toResponse(merchant));
@@ -63,14 +61,10 @@ public class MerchantController {
     public ResponseEntity<MerchantResponse> updateMerchant(
             @AuthenticationPrincipal User user,
             @PathVariable UUID merchantId,
-            @RequestBody UpdateMerchantRequest body
+            @Valid @RequestBody UpdateMerchantRequest body
     ) {
-        Merchant merchant = merchantService.getMerchantByIdAndUserId(merchantId, user.getUserId());
-        if  (merchant == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        merchant = merchantService.updateMerchant(merchantId, body);
+        merchantService.getMerchantByIdAndUserId(merchantId, user.getUserId());
+        Merchant merchant = merchantService.updateMerchant(merchantId, body);
         return ResponseEntity.ok(merchantService.toResponse(merchant));
     }
 }

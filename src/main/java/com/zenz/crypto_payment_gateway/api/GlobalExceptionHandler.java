@@ -9,17 +9,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 400
+    // 400 - 499
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException exc) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(new SimpleErrorDetail("Invalid message received")));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException exc) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(new SimpleErrorDetail("Invalid arguments received")));
     }
 
     @ExceptionHandler(ResourceNotFound.class)
@@ -29,7 +37,7 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(new SimpleErrorDetail(exc.getMessage())));
     }
 
-    // 500
+    // 500 - 599
 
     @ExceptionHandler(ServerError.class)
     public ResponseEntity<ErrorResponse> handleServerError(ServerError exc) {

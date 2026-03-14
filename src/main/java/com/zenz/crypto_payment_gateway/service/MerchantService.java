@@ -33,7 +33,7 @@ public class MerchantService {
     }
     
     public Merchant getMerchantByIdAndUserId(UUID merchantId, UUID userId) {
-        Merchant merchant = merchantRepository.findByMerchantIdAndUserId(merchantId, userId).orElse(null);
+        Merchant merchant = merchantRepository.findByIdAndUserId(merchantId, userId).orElse(null);
         if (merchant == null) {
             throw new ResourceNotFound(
                     String.format("Failed to find merchant with id %s for user", merchantId)

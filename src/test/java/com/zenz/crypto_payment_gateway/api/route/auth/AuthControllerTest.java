@@ -35,7 +35,7 @@ import java.util.UUID;
  * Tests target expected behavior and validation standards for production readiness.
  */
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, GlobalExceptionHandler.class})
+@Import({SecurityConfig.class})
 class AuthControllerTest {
 
     @Autowired
