@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/merchants/{merchantId}/price")
+@RequestMapping("/merchants/{merchantId}/prices/")
 @RequiredArgsConstructor
 public class PriceController {
 
