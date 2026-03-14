@@ -30,16 +30,8 @@ public class ProductController {
             @PathVariable UUID merchantId,
             @RequestBody CreateProductRequest body
     ) {
-        Merchant merchant = merchantService.getMerchantByIdAndUserId(merchantId, user.getUserId());
-        Product product = new Product();
-
-        product.setMerchantId(merchantId);
-        product.setMerchant(merchant);
-        product.setName(body.getName());
-        product.setDescription(body.getDescription());
-
-        product = productService.createProduct(product);
-
+        merchantService.getMerchantByIdAndUserId(merchantId, user.getUserId());
+        Product product = productService.createProduct(body, merchantId);
         return ResponseEntity.ok(productService.toResponse(product));
     }
 

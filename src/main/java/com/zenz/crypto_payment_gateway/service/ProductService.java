@@ -1,9 +1,11 @@
 package com.zenz.crypto_payment_gateway.service;
 
 import com.zenz.crypto_payment_gateway.api.error.ResourceNotFound;
+import com.zenz.crypto_payment_gateway.api.route.product.request.CreateProductRequest;
 import com.zenz.crypto_payment_gateway.api.route.product.request.UpdateProductRequest;
 import com.zenz.crypto_payment_gateway.api.route.product.response.ProductResponse;
 import com.zenz.crypto_payment_gateway.entity.Product;
+import com.zenz.crypto_payment_gateway.repository.MerchantRepository;
 import com.zenz.crypto_payment_gateway.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +15,30 @@ import java.util.UUID;
 @Service
 public class ProductService {
     private ProductRepository productRepository;
+    private MerchantRepository merchantRepository;
 
-    public Product createProduct(Product product) {
-        return productRepository.save(product);
+//    public Product createProduct(Product product) {
+//        return productRepository.save(product);
+//    }
+
+    public Product createProduct(CreateProductRequest request, UUID merchantId) {
+        Product product = new Product();
+        product.setMerchantId(merchantId);
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setImage(request.getImage());
+
+        productRepository.save(product);
+        return product;
     }
 
-    public Product getProduct(UUID id) {
-        return productRepository.findById(id).orElse(null);
+    public Product getProductById(UUID id) {
+        Product product  = productRepository.findById(id).orElse(null);
+        if (product == null) {
+            throw new ResourceNotFound("Product not found");
+        }
+
+        return product;
     }
 
     public List<Product> getProductsByMerchantId(UUID merchantId) {
@@ -37,7 +56,12 @@ public class ProductService {
     }
 
     public Product updateProduct(Product product, UpdateProductRequest request) {
-        return productRepository.save(product);
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setImage(request.getImage());
+
+        productRepository.save(product);
+        return product;
     }
 
     public ProductResponse toResponse(Product product) {
@@ -48,7 +72,6 @@ public class ProductService {
         response.setName(product.getName());
         response.setDescription(product.getDescription());
         response.setImage(product.getImage());
-        response.setWalletAddress(product.getWalletAddress());
         response.setCreatedAt(product.getCreatedAt());
 
         return response;

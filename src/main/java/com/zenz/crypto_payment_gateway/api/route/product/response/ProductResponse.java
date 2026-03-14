@@ -13,6 +13,5 @@ public class ProductResponse {
     private String name;
     private String description;
     private String image;
-    private String walletAddress;
     private long createdAt;
 }
