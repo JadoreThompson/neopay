@@ -37,13 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Comprehensive test suite for ProductController endpoints.
- * Tests target expected behavior and validation standards for production readiness.
- * 
- * Products are nested resources under merchants, requiring both merchant and product
- * validation for proper access control and data integrity.
- */
+
 @WebMvcTest(ProductController.class)
 @Import({SecurityConfig.class, GlobalExceptionHandler.class})
 class ProductControllerTest {

@@ -40,14 +40,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Comprehensive test suite for PriceController endpoints.
- * Tests target expected behavior and validation standards for production readiness.
- * 
- * Each price object belongs to a Product object. It contains the pricing type,
- * details on its billing intervals and more data bespoke to each individual
- * pricing model for a product.
- */
+
 @WebMvcTest(PriceController.class)
 @Import({SecurityConfig.class, GlobalExceptionHandler.class})
 class PriceControllerTest {

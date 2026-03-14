@@ -39,13 +39,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Comprehensive test suite for InvoiceController endpoints.
- * Tests target expected behavior and validation standards for production readiness.
- * 
- * Each invoice belongs to a Customer and Merchant. It contains billing details
- * including amount due, amount paid, currency, status, and metadata.
- */
 @WebMvcTest(InvoiceController.class)
 @Import({SecurityConfig.class, GlobalExceptionHandler.class})
 class InvoiceControllerTest {

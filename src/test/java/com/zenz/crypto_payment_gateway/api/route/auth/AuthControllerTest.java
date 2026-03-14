@@ -30,10 +30,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Comprehensive test suite for AuthController endpoints.
- * Tests target expected behavior and validation standards for production readiness.
- */
+
 @WebMvcTest(AuthController.class)
 @Import({SecurityConfig.class})
 class AuthControllerTest {

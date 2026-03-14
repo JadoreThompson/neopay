@@ -87,6 +87,9 @@ public class SubscriptionService {
 
     public void cancelSubscription(UUID subscriptionId) {
         Subscription subscription = getSubscriptionById(subscriptionId);
+        if (subscription == null) {
+            throw new ResourceNotFound(String.format("Failed to find subscription with id %s", subscriptionId));
+        }
         subscription.setStatus(SubscriptionStatus.CANCELLED);
         subscriptionRepository.save(subscription);
     }

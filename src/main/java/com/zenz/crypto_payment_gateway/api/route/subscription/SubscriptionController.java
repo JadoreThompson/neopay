@@ -65,6 +65,7 @@ public class SubscriptionController {
             @PathVariable UUID subscriptionId
     ) {
         merchantService.getMerchantByIdAndUserId(merchantId, user.getUserId());
+        subscriptionService.getSubscriptionByIdAndMerchantId(subscriptionId, merchantId);
         subscriptionService.cancelSubscription(subscriptionId);
         return ResponseEntity.noContent().build();
     }

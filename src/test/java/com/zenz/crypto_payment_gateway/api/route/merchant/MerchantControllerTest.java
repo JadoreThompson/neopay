@@ -37,10 +37,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 
-/**
- * Comprehensive test suite for MerchantController endpoints.
- * Tests target expected behavior and validation standards for production readiness.
- */
+
 @WebMvcTest(MerchantController.class)
 @Import({SecurityConfig.class, GlobalExceptionHandler.class})
 class MerchantControllerTest {
