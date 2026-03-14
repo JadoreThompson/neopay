@@ -50,8 +50,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleGenericException(RuntimeException exc) {
+        System.err.println(exc.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(new SimpleErrorDetail("An unexpected error occurred " + exc.getClass().getName())));
+//                .body(new ErrorResponse(new SimpleErrorDetail("An unexpected error occurred " + exc.getClass().getName())));
+                .body(new ErrorResponse(new SimpleErrorDetail("An unexpected error occurred")));
     }
 }

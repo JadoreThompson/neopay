@@ -1,4 +1,4 @@
-package com.zenz.crypto_payment_gateway.api.route.auth.model.request.validation;
+package com.zenz.crypto_payment_gateway.api.route.auth.model.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

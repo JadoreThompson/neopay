@@ -1,6 +1,6 @@
 package com.zenz.crypto_payment_gateway.api.route.auth.model.request;
 
-import com.zenz.crypto_payment_gateway.api.route.auth.model.request.validation.ValidPassword;
+import com.zenz.crypto_payment_gateway.api.route.auth.model.validation.ValidPassword;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
