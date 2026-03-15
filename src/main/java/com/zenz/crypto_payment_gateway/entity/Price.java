@@ -16,10 +16,10 @@ public class Price {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID priceId;
 
-    @Column(name="merchant_id" , nullable = false, updatable = false)
+    @Column(name = "merchant_id", nullable = false, updatable = false)
     private UUID merchantId;
 
-    @Column(name="product_id",nullable = false, updatable = false)
+    @Column(name = "product_id", nullable = false, updatable = false)
     private UUID productId;
 
     @Column(nullable = false)
