@@ -108,7 +108,7 @@ class PriceControllerTest {
 
         // Recurring price
         Recurring recurring = new Recurring();
-        recurring.setInterval(PricingInterval.MONTHLY);
+        recurring.setIntervalType(PricingInterval.MONTHLY);
         recurring.setIntervalCount(1);
 
         testRecurringPrice = new Price();
@@ -185,7 +185,7 @@ class PriceControllerTest {
         setupAuthentication();
 
         Recurring recurring = new Recurring();
-        recurring.setInterval(PricingInterval.MONTHLY);
+        recurring.setIntervalType(PricingInterval.MONTHLY);
         recurring.setIntervalCount(1);
 
         CreatePriceRequest request = new CreatePriceRequest();
@@ -221,7 +221,7 @@ class PriceControllerTest {
         setupAuthentication();
 
         Recurring recurring = new Recurring();
-        recurring.setInterval(PricingInterval.WEEKLY);
+        recurring.setIntervalType(PricingInterval.WEEKLY);
         recurring.setIntervalCount(2);
 
         CreatePriceRequest request = new CreatePriceRequest();
@@ -261,7 +261,7 @@ class PriceControllerTest {
         setupAuthentication();
 
         Recurring recurring = new Recurring();
-        recurring.setInterval(PricingInterval.DAILY);
+        recurring.setIntervalType(PricingInterval.DAILY);
         recurring.setIntervalCount(1);
 
         CreatePriceRequest request = new CreatePriceRequest();
@@ -638,7 +638,7 @@ class PriceControllerTest {
         setupAuthentication();
 
         Recurring recurring = new Recurring();
-        recurring.setInterval(PricingInterval.MONTHLY);
+        recurring.setIntervalType(PricingInterval.MONTHLY);
         recurring.setIntervalCount(3); // Every 3 months
 
         CreatePriceRequest request = new CreatePriceRequest();
@@ -1326,7 +1326,7 @@ class PriceControllerTest {
         setupAuthentication();
 
         Recurring recurring = new Recurring();
-        recurring.setInterval(PricingInterval.MONTHLY);
+        recurring.setIntervalType(PricingInterval.MONTHLY);
         recurring.setIntervalCount(0);
 
         CreatePriceRequest request = new CreatePriceRequest();

@@ -27,6 +27,7 @@ public class Price {
     private long amount;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private PricingType pricingType;
 
     @Embedded
