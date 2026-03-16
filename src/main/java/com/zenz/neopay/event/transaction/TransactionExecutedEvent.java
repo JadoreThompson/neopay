@@ -1,5 +1,6 @@
-package com.zenz.neopay.service.blockchain.event;
+package com.zenz.neopay.event.transaction;
 
+import java.math.BigInteger;
 import java.util.UUID;
 
 public record TransactionExecutedEvent(
@@ -8,7 +9,7 @@ public record TransactionExecutedEvent(
         String sender,
         String recipient,
         String token,
-        long amount,
-        long timestamp
-) {
+        BigInteger amount,
+        BigInteger timestamp
+) implements TransactionEvent {
 }

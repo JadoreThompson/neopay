@@ -1,6 +1,7 @@
 package com.zenz.neopay.repository;
 
 import com.zenz.neopay.entity.Invoice;
+import com.zenz.neopay.enums.InvoiceStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +16,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
     List<Invoice> findByMerchantId(UUID merchantId);
 
     Invoice findByInvoiceIdAndMerchantId(UUID id, UUID merchantId);
+
+    Invoice findByInvoiceIdAndStatus(UUID id, InvoiceStatus status);
 }

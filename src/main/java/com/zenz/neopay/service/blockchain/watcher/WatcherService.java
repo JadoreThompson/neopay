@@ -1,8 +1,8 @@
 package com.zenz.neopay.service.blockchain.watcher;
 
 
-import com.zenz.neopay.service.blockchain.event.TransactionCreatedEvent;
-import com.zenz.neopay.service.blockchain.event.TransactionExecutedEvent;
+import com.zenz.neopay.event.transaction.TransactionExecutedEvent;
+import com.zenz.neopay.event.transaction.TransactionFailedEvent;
 
 public interface WatcherService {
 
@@ -10,7 +10,7 @@ public interface WatcherService {
 
     void stop();
 
-    void handleTransactionCreated(TransactionCreatedEvent event);
-
     void handleTransactionExecuted(TransactionExecutedEvent event);
+
+    void handleTransactionFailed(TransactionFailedEvent event);
 }

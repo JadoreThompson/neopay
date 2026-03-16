@@ -1,5 +1,6 @@
-package com.zenz.neopay.service.blockchain.event;
+package com.zenz.neopay.event.transaction;
 
+import java.math.BigInteger;
 import java.util.UUID;
 
 public record TransactionFailedEvent(
@@ -8,8 +9,8 @@ public record TransactionFailedEvent(
         String sender,
         String recipient,
         String token,
-        long amount,
+        BigInteger amount,
         String reason,
-        long timestamp
-) {
+        BigInteger timestamp
+) implements TransactionEvent {
 }
