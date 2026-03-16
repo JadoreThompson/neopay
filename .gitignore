@@ -33,4 +33,4 @@ build/
 
 ### Private ###
 prompts/
-application-test.properties
+application-dev.properties

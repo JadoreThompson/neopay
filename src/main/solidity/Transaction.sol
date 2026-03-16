@@ -28,7 +28,8 @@ contract Transaction {
         address indexed sender,
         address indexed recipient,
         address token,
-        uint256 amount
+        uint256 amount,
+        uint256 timestamp
     );
 
     event TransactionExecuted(
@@ -37,7 +38,8 @@ contract Transaction {
         address indexed sender,
         address indexed recipient,
         address token,
-        uint256 amount
+        uint256 amount,
+        uint256 timestamp
     );
 
     event TransactionFailed(
@@ -47,7 +49,8 @@ contract Transaction {
         address indexed recipient,
         address token,
         uint256 amount,
-        string reason
+        string reason,
+        uint256 timestamp
     );
 
     modifier onlyOwner() {
@@ -92,7 +95,8 @@ contract Transaction {
             sender,
             recipient,
             token,
-            amount
+            amount,
+            block.timestamp
         );
     }
 
@@ -115,7 +119,8 @@ contract Transaction {
                 txn.recipient,
                 txn.token,
                 txn.amount,
-                "Insufficient token balance"
+                "Insufficient token balance",
+                block.timestamp
             );
             return;
         }
@@ -136,7 +141,8 @@ contract Transaction {
                 txn.recipient,
                 txn.token,
                 txn.amount,
-                "ERC20 transfer failed"
+                "ERC20 transfer failed",
+                block.timestamp
             );
             return;
         }
@@ -150,7 +156,8 @@ contract Transaction {
             txn.sender,
             txn.recipient,
             txn.token,
-            txn.amount
+            txn.amount,
+            block.timestamp
         );
     }
 
