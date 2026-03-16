@@ -37,11 +37,16 @@ public class WalletService {
         return walletRepository.findByMerchantId(merchantId);
     }
 
+    public Wallet save(Wallet wallet) {
+        return walletRepository.save(wallet);
+    }
+
     public WalletResponse toResponse(Wallet wallet) {
         WalletResponse response = new WalletResponse();
         response.setWalletId(wallet.getWalletId());
         response.setBalance(wallet.getBalance());
-        response.setCurrency(wallet.getCurrency());
+        response.setEscrow(wallet.getEscrow());
+        response.setToken(wallet.getToken());
         response.setWalletAddress(wallet.getWalletAddress());
         
         return response;

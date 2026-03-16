@@ -3,9 +3,13 @@ package com.zenz.neopay.service.blockchain.watcher;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zenz.neopay.entity.EthereumWatcherEvents;
+import com.zenz.neopay.entity.Invoice;
+import com.zenz.neopay.enums.InvoiceStatus;
+import com.zenz.neopay.enums.Token;
 import com.zenz.neopay.event.transaction.*;
 import com.zenz.neopay.repository.EthereumWatcherEventsRepository;
 import com.zenz.neopay.repository.InvoiceRepository;
+import com.zenz.neopay.service.BalanceTransactionService;
 import io.reactivex.disposables.Disposable;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -40,6 +44,8 @@ public class EthereumWatcherService implements WatcherService {
     private final EthereumWatcherEventsRepository watcherEventsRepository;
 
     private final InvoiceRepository invoiceRepository;
+
+    private final BalanceTransactionService balanceTransactionService;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -131,18 +137,16 @@ public class EthereumWatcherService implements WatcherService {
     public static TransactionExecutedEvent buildTransactionExecutedEvent(Log logObject) {
         var eventValues = Contract.staticExtractEventParameters(TRANSACTION_EXECUTED_EVENT, logObject);
 
-        String transactionKey = ((Bytes32) eventValues.getIndexedValues().get(0)).getValue().toString();
         String sender = ((Address) eventValues.getIndexedValues().get(1)).getValue();
         String recipient = ((Address) eventValues.getIndexedValues().get(2)).getValue();
 
-        String transactionId = ((Utf8String) eventValues.getNonIndexedValues().get(0)).getValue();
+        String invoiceId = ((Utf8String) eventValues.getNonIndexedValues().get(0)).getValue();
         String token = ((Address) eventValues.getNonIndexedValues().get(1)).getValue();
         BigInteger amount = ((Uint256) eventValues.getNonIndexedValues().get(2)).getValue();
         BigInteger timestamp = ((Uint256) eventValues.getNonIndexedValues().get(3)).getValue();
 
         return new TransactionExecutedEvent(
-                transactionKey,
-                UUID.fromString(transactionId),
+                UUID.fromString(invoiceId),
                 sender,
                 recipient,
                 token,
@@ -154,19 +158,17 @@ public class EthereumWatcherService implements WatcherService {
     public static TransactionFailedEvent buildTransactionFailedEvent(Log logObject) {
         var eventValues = Contract.staticExtractEventParameters(TRANSACTION_FAILED_EVENT, logObject);
 
-        String transactionKey = ((Bytes32) eventValues.getIndexedValues().get(0)).getValue().toString();
         String sender = ((Address) eventValues.getIndexedValues().get(1)).getValue();
         String recipient = ((Address) eventValues.getIndexedValues().get(2)).getValue();
 
-        String transactionId = ((Utf8String) eventValues.getNonIndexedValues().get(0)).getValue();
+        String invoiceId = ((Utf8String) eventValues.getNonIndexedValues().get(0)).getValue();
         String token = ((Address) eventValues.getNonIndexedValues().get(1)).getValue();
         BigInteger amount = ((Uint256) eventValues.getNonIndexedValues().get(2)).getValue();
         String reason= ((Utf8String) eventValues.getNonIndexedValues().get(3)).getValue();
         BigInteger timestamp = ((Uint256) eventValues.getNonIndexedValues().get(4)).getValue();
 
         return new TransactionFailedEvent(
-                transactionKey,
-                UUID.fromString(transactionId),
+                UUID.fromString(invoiceId),
                 sender,
                 recipient,
                 token,
@@ -195,6 +197,35 @@ public class EthereumWatcherService implements WatcherService {
     @Override
     public void handleTransactionExecuted(TransactionExecutedEvent event) {
         log.info("Handling transaction executed event {}", event.toString());
+
+        Invoice invoice = invoiceRepository.findById(event.invoiceId()).orElse(null);
+        if (invoice == null) {
+            log.warn("Could not find invoice with id {}", event.invoiceId());
+            return;
+        }
+
+        invoice.setAmountPaid(invoice.getAmountPaid().add(event.amount()));
+        if (invoice.getAmountPaid().compareTo(invoice.getAmountDue()) > 0) {
+            invoice.setStatus(InvoiceStatus.PAID);
+        }
+
+        invoiceRepository.save(invoice);
+
+        // Credit the merchant wallet and global balance
+        try {
+            UUID transactionId = UUID.randomUUID();
+            balanceTransactionService.increaseBalance(
+                    invoice.getMerchantId(),
+                    transactionId,
+                    event.amount(),
+                    Token.ETHEREUM
+            );
+            log.info("Successfully credited merchant {} balance for transaction {}", 
+                    invoice.getMerchantId(), transactionId);
+        } catch (Exception e) {
+            log.error("Failed to update merchant balance for invoice {}", event.invoiceId(), e);
+            throw e;
+        }
     }
 
     public void handleTransactionFailed(TransactionFailedEvent event, Log logObject) throws JsonProcessingException {

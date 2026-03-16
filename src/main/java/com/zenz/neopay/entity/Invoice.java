@@ -5,6 +5,7 @@ import com.zenz.neopay.model.InvoiceLine;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,9 +23,9 @@ public class Invoice {
     @Column(name="customer_id" , nullable = false, updatable = false)
     private UUID customerId;
 
-    private long amountDue;
+    private BigInteger amountDue;
 
-    private long amountPaid;
+    private BigInteger amountPaid;
 
     private String currency;
 

@@ -3,6 +3,7 @@ package com.zenz.neopay.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigInteger;
 import java.util.UUID;
 
 @Data
@@ -17,10 +18,13 @@ public class Wallet {
     private UUID merchantId;
 
     @Column(nullable = false)
-    private long balance;
+    private BigInteger balance;
 
     @Column(nullable = false)
-    private String currency;
+    private BigInteger escrow;
+
+    @Column(nullable = false)
+    private String token;
 
     @Column(nullable = false)
     private String walletAddress;
