@@ -7,26 +7,44 @@ import com.zenz.neopay.entity.Withdrawal;
 import com.zenz.neopay.enums.WithdrawalStatus;
 import com.zenz.neopay.repository.WithdrawalRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class WithdrawalService {
 
     private final WithdrawalRepository withdrawalRepository;
+    private final BalanceTransactionService balanceTransactionService;
 
+    @Transactional
     public Withdrawal createWithdrawal(UUID merchantId, CreateWithdrawalRequest request) {
         Withdrawal withdrawal = new Withdrawal();
         withdrawal.setMerchantId(merchantId);
         withdrawal.setAmount(request.getAmount());
-        withdrawal.setCurrency(request.getCurrency());
+        withdrawal.setCurrency(request.getToken().getValue());
         withdrawal.setChain(request.getChain());
         withdrawal.setStatus(WithdrawalStatus.PENDING);
         
-        return withdrawalRepository.save(withdrawal);
+        withdrawal = withdrawalRepository.save(withdrawal);
+
+        // Initiate withdrawal: check balance and move to escrow
+        balanceTransactionService.initiateWithdrawal(
+                merchantId,
+                withdrawal.getWithdrawalId(),
+                request.getAmount(),
+                request.getToken()
+        );
+
+        log.info("Created withdrawal {} for merchant {} amount {} token {}",
+                withdrawal.getWithdrawalId(), merchantId, request.getAmount(), request.getToken());
+
+        return withdrawal;
     }
 
     public Withdrawal getWithdrawalById(UUID withdrawalId) {

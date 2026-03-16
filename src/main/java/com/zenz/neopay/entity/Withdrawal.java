@@ -2,9 +2,9 @@ package com.zenz.neopay.entity;
 
 import com.zenz.neopay.enums.WithdrawalStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
+import java.math.BigInteger;
 import java.util.UUID;
 
 
@@ -22,9 +22,8 @@ public class Withdrawal {
     @Column(name="wallet_id" , nullable = false, updatable = false)
     private UUID walletId;
 
-    @Positive
     @Column(nullable = false, updatable = false)
-    private long amount;
+    private BigInteger amount;
 
     @Column(nullable = false, updatable = false)
     private String currency;

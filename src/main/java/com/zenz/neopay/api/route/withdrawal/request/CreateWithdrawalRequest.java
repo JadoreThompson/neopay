@@ -1,18 +1,20 @@
 package com.zenz.neopay.api.route.withdrawal.request;
 
-import jakarta.validation.constraints.Min;
+import com.zenz.neopay.enums.Token;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.math.BigInteger;
 import java.util.UUID;
 
 @Data
 public class CreateWithdrawalRequest {
-    @Min(1)
-    private long amount;
+    @NotNull
+    private BigInteger amount;
 
-    @NotBlank
-    private String currency;
+    @NotNull
+    private Token token;
 
     @NotBlank
     private String chain;
